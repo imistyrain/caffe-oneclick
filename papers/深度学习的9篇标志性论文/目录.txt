@@ -1,0 +1,29 @@
+deep learning 的一些标志性文章
+
+
+A Fast Learning Algorithm for Deep Belief Nets (2006)
+- 首 次提出layerwise greedy pretraining的方法，开创deep learning方向。 layerwise pretraining的Restricted Boltzmann Machine (RBM)堆叠起来构成 Deep Belief Network (DBN)，其中训练最高层的RBM时加入了label。之后对整个DBN进行fine-tuning。在 MNIST数据集上测试没有严重过拟合，得到了比Neural Network (NN)更低的test error。
+
+Reducing the Dimensionality of Data with Neural Networks (2006)
+- 提 出deep autoencoder，作为数据降维方法发在Science上。Autoencoder是一类通过最小化函数集对训练集数据的重构误差，自 适应地编解码训练数据的算法。Deep autoencoder模型用Contrastive Divergence (CD)算法逐层训练重构输入数据 的RBM，堆叠在一起fine-tuning最小化重构误差。作为非线性降维方法在图像和文本降维实验中明显优于传统方法。
+
+Learning Deep Architectures for AI (2009)
+- Bengio关于deep learning的tutorial，从研究背景到RBM和CD再到数种deep learning算法都有详细介绍。还有丰富的reference。于是也有个缺点就是太长了。
+
+A Practical Guide to Training Restricted Boltzmann Machines (2010)
+- 如果想要自己实现deep learning算法，这篇是不得不看的。我曾经试过自己写但是效果很不好，后来看到它才知道算法实现中还有很多重要的细节。对照网上的代码看也能更好地理解代码。
+
+Greedy Layer-Wise Training of Deep Networks (2007)
+- 对DBN的一些扩展，比如应用于实值输入等。根据实验提出了对deep learning的performance的一种解释。
+
+Why Does Unsupervised Pre-training Help Deep Learning? (2010)
+- 总结了对deep learning的pretraining作用的两种解释：regularization和help optimization。设计实验验证两种因素的作用。
+
+Autoencoders, Unsupervised Learning, and Deep Architectures (2011)
+- 从理论角度对不同的Autoencoders作了统一分析的尝试。
+
+On the Quantitative Analysis of Deep Belief Networks (2008)
+- 用annealed importance sampling (AIS)给出一种估计RBM的partition function的方法，从而能够估算p(x)以及比较不同的DBN。
+
+Training Restricted Boltzmann Machines using Approximations to the Likelihood Gradient (2008)
+- 提 出用persistent contrastive divergence (PCD)算法逼近 maximum likelihood estimation的目标，从而可以得到更好的generative model。传统CD算法并不是以最大化 p(x)为目标的，另有paper证明CD算法不对应任何优化目标函数

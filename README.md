@@ -18,3 +18,6 @@
 具体包括深度学习的相关论文、教程、博客以及tricks，尤其是相关库的配置和使用，少部分的原理解析暂未放出。大部分的内容经过了我的验证，如果发现有错误之处，欢迎指正。
 
 本文的资料来自于网上各位大神的无私奉献，版权归原作者所有。如果不经意间侵犯了您的正当权益，请联系我删除。
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/imistyrain/opendl/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+

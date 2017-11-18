@@ -1,0 +1,16 @@
+train_net: "util/train.prototxt"
+test_net: "util/test.prototxt"
+test_iter: 15
+test_interval: 500
+base_lr: 0.00999999977648
+display: 1000
+max_iter: 10000
+lr_policy: "step"
+gamma: 0.10000000149
+power: 0.75
+momentum: 0.899999976158
+weight_decay: 0.000500000023749
+stepsize: 5000
+snapshot: 5000
+snapshot_prefix: "output/plate"
+solver_mode: GPU

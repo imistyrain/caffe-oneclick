@@ -1,5 +1,6 @@
 #define REG_USE_CNN 1
 #pragma warning(disable:4996)
+#include "mrdir.h"
 #include "mrutil.h"
 #include "cnnpredictor.h"
 const string errordir = caffeplatedir + "error";
@@ -30,10 +31,10 @@ int evaluation()
 	string line;
 	string label;
 	int rightcount = 0, errorcount = 0, total = 0;	
-	if (!exist(errordir.c_str()))
+	if (!EXISTS(errordir.c_str()))
 	{
 		cout << "Error dir not exist" << endl;
-		_mkdir(errordir.c_str());
+		MKDIR(errordir.c_str());
 	}
 	clearerror(errordir);
 	vector<string>subdirs=getAllSubdirs(platedatadir);
@@ -53,15 +54,15 @@ int evaluation()
 				errorcount++;
 				string errorlabeldir = errordir;
 				errorlabeldir = errorlabeldir + "/" + sub;
-				if (!exist(errorlabeldir.c_str()))
+				if (!EXISTS(errorlabeldir.c_str()))
 				{
-					_mkdir(errorlabeldir.c_str());
+					MKDIR(errorlabeldir.c_str());
 				}
 				string errorfilepath = errorlabeldir + "/" + file.substr(0,file.size()-4) + "_" + sub + "_" + ret + ".png";
 				cout << sub + "/" + file.substr(0, file.size() - 4) + ":" + ret << endl;
-				imshow("error", img);
+				//imshow("error", img);
 				imwrite(errorfilepath, img);
-				cv::waitKey(1);
+				//cv::waitKey(1);
 			}
 			total++;
 		}

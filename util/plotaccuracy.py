@@ -1,5 +1,5 @@
 ﻿#coding =utf-8
-#迷若烟雨 @ G-wearable
+#迷若烟雨@Baidu
 import re
 import matplotlib.pyplot as plt
 import os
@@ -25,7 +25,7 @@ def getlastesttraininfofilefromdir(logdir):
 def plotaccuarcy():
     logdir='log'
     infologfile=getlastesttraininfofilefromdir(logdir)
-    print infologfile
+    print(infologfile)
     if infologfile:
     #    infologfile='../log/INFO2015-11-19T19-45-15.txt'
         f=open(infologfile)
@@ -47,4 +47,3 @@ def plotaccuarcy():
         plt.show()
 if __name__=="__main__":
     plotaccuarcy()
-    raw_input()

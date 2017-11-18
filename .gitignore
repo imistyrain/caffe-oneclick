@@ -1,0 +1,8 @@
+build
+data
+output
+error
+error.txt
+*.solverstate
+*.caffemodel
+*lmdb

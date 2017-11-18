@@ -5,9 +5,9 @@
 using namespace cv::dnn;
 using namespace std;
 const string caffeplatedir = "../";
-const string model_file = caffeplatedir + "/modeldef/deploy.prototxt";
-const string trained_file = caffeplatedir + "/plate996.caffemodel";
-const string mean_file = caffeplatedir + "/modeldef/mean.binaryproto";
+const string model_file = caffeplatedir + "/models/deploy.prototxt";
+const string trained_file = caffeplatedir + "/models/plate999.caffemodel";
+const string mean_file = caffeplatedir + "/models/mean.binaryproto";
 
 class CLenetClassifier
 {

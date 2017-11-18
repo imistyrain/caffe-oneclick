@@ -1,87 +1,89 @@
 ﻿import os,argparse,sys,time,shutil
 import numpy as np
 import sys
-sys.path.append(r'../../python')
+sys.path.append('../python')
 import caffe
+import logging
+from tqdm import tqdm
+
+def create_logger(logdir="output"):
+    time_str = time.strftime('%Y%m%d-%H%M%S')
+    log_file = '{}/{}.log'.format(logdir, time_str)
+    head = '%(asctime)-15s %(message)s'
+    logging.basicConfig(filename=str(log_file),format=head)
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    console = logging.StreamHandler()
+    logging.getLogger('').addHandler(console)
 
 def clearlasterrors(args):
-    print "Clearing last errors"
-    subdirs=os.listdir(args.errordir)
-    for subdir in subdirs:
-        print subdir
-        files=os.listdir(args.errordir+"/"+subdir)
-        for file in files:
-            os.remove(args.errordir+"/"+subdir+"/"+file)
-        os.rmdir(args.errordir+"/"+subdir)
+    if os.path.exists("error"):
+        subdirs=os.listdir(args.errordir)
+        for subdir in subdirs:
+            files=os.listdir(args.errordir+"/"+subdir)
+            for file in files:
+                os.remove(args.errordir+"/"+subdir+"/"+file)
+            os.rmdir(args.errordir+"/"+subdir)
+
 def loadmean(meanprotopath):
     blob = caffe.proto.caffe_pb2.BlobProto()
     blob.ParseFromString(open(meanprotopath, 'rb').read())   
     return np.array(caffe.io.blobproto_to_array(blob))[0]
 
 def getclassifier(args):
-    channel_swap=[2,1,0]
-    raw_scale=255
-    pretrainedmodel=args.weights_prefix+str(args.iter)+".caffemodel"
-    classifier = caffe.Classifier(args.modeldef, pretrainedmodel,image_dims=args.image_dims,
-                                  #mean=loadmean(args.meanfile).mean(1).mean(1),
-                                  #raw_scale=raw_scale,
-                                  channel_swap=channel_swap
-                                  )
+    classifier = caffe.Classifier(args.modeldef, args.weights,image_dims=args.image_dims
+    )
+    ##mean=loadmean(args.meanfile).mean(1).mean(1),#raw_scale=255,channel_swap=[2,1,0]
     caffe.set_mode_gpu()
     return classifier
 
 class EvalStatic:
-    total=0
-    error=0
+    total = 0
+    error = 0
     def __str__(self):
         return str(self.error)+","+str(self.total)+","+str(self.error*1.0/self.total)
 
 def evaluationonebyone(args):
     labels=[w.split()[1] for w in open(args.labelfile).readlines()]
-    classifier=getclassifier(args)
-    flog=open(args.logfile,'w')
+    classifier = getclassifier(args)
     start = time.time()
     if not os.path.exists(args.errordir):
         os.mkdir(args.errordir)
     subdirs=os.listdir(args.datadir)
     evalstatics=[]
     for subdir in subdirs:
-        print subdir+":"
+        print(subdir+":")
         evalstatic=EvalStatic()
         files=os.listdir(args.datadir+'/'+subdir)
         evalstatic.total=len(files)
-        for file in files:
+        for file in tqdm(files):
             imgpath=args.datadir+'/'+subdir+'/'+file
             inputs = [caffe.io.load_image(imgpath)]
             try:
                 predictions = classifier.predict(inputs,oversample=False)
             except Exception as e:
-                print e
+                print(e)
             p=predictions[0,:].argmax()
             label=labels[p]
             if subdir!=label:
-                print subdir,file,label
-                flog.write(str(subdir+'/'+str(file)+':'+str(label)+'\n'))
+                logging.info(subdir+" "+file+":"+str(label))
                 evalstatic.error=evalstatic.error+1
                 if not os.path.exists(args.errordir+'/'+subdir):
                     os.mkdir(args.errordir+'/'+subdir)
                 errorfilepath=args.errordir+'/'+subdir+'/'+file[:-4]+"_"+subdir+'_'+label+'.jpg'
                 shutil.copy(imgpath,errorfilepath)
         evalstatics.append(evalstatic)
-    flog.write("Done in %.2f s.\n" % (time.time() - start))
-    print("Done in %.2f s." % (time.time() - start))
+    logging.info("Done in %.2f s." % (time.time() - start))
     totalcount=0
     error=0
-    for i,evalstatic in  enumerate(evalstatics):
+    for i,evalstatic in enumerate(evalstatics):
         error=error+evalstatic.error
         totalcount=totalcount+evalstatic.total
-        print subdirs[i],evalstatic
-        flog.write(subdirs[i]+" "+str(evalstatic)+"\n")
-    print error,totalcount,error*1.0/totalcount
-    flog.write(str(error)+" "+str(totalcount)+" "+str(error*1.0/totalcount))
-    flog.close()
+        logging.info(subdirs[i]+":"+str(evalstatic))
+    logging.info("Toal error")
+    logging.info(str(error)+" "+str(totalcount)+" "+str(error*1.0/totalcount))
 
-def evaluation(args):
+def evaluation_batch(args):
     labels=[w.split()[1] for w in open(args.labelfile).readlines()]
     classifier=getclassifier(args)
     start = time.time()
@@ -89,9 +91,8 @@ def evaluation(args):
         os.mkdir(args.errordir)
     subdirs=os.listdir(args.datadir)
     evalstatics=[]
-    flog=open(args.logfile,'w')
     for subdir in subdirs:
-        print subdir+":"
+        print(subdir)
         evalstatic=EvalStatic()
         files=os.listdir(args.datadir+'/'+subdir)
         evalstatic.total=len(files)
@@ -99,13 +100,12 @@ def evaluation(args):
         try:
             predictions = classifier.predict(inputs,oversample=False)
         except Exception as e:
-            print e
-        for i in range(len(files)):
+            print(e)
+        for i in tqdm(range(len(files))):
             p=predictions[i,:].argmax()
             label=labels[p]
             if subdir!=label:
-                print subdir,files[i],label
-                flog.write(subdir,files[i],label,'\n')
+                logging.info(subdir+" "+files[i]+":"+str(label))
                 evalstatic.error=evalstatic.error+1
                 if not os.path.exists(args.errordir+'/'+subdir):
                     os.mkdir(args.errordir+'/'+subdir)
@@ -113,49 +113,34 @@ def evaluation(args):
                 errorfilepath=args.errordir+'/'+subdir+'/'+files[i][:-4]+"_"+subdir+'_'+label+'.jpg'
                 shutil.copy(imgpath,errorfilepath)
         evalstatics.append(evalstatic)
-    flog.write("Done in %.2f s." % (time.time() - start))
-    print("Done in %.2f s." % (time.time() - start))
+    logging.info("Done in %.2f s." % (time.time() - start))
     totalcount=0
     error=0
-    for i,evalstatic in  enumerate(evalstatics):
+    for i,evalstatic in enumerate(evalstatics):
         error=error+evalstatic.error
         totalcount=totalcount+evalstatic.total
-        print subdirs[i],evalstatic
-        flog.write(subdirs[i]+str(evalstatic)+"\n")
-    print error,totalcount,error*1.0/totalcount
-    flog.write(str(error)+str(totalcount)+str(error*1.0/totalcount))
-    flog.close()
+        logging.info(subdirs[i]+":"+str(evalstatic))
+    logging.info("Toal error")
+    logging.info(str(error)+" "+str(totalcount)+" "+str(error*1.0/totalcount))
 
-def evaluationdir():
+def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--iter",default=10000,help="caffemodel iter to evaluation")
-    parser.add_argument("--datadir",default="../data",help="caffemodel iter to evaluation")
+    parser.add_argument("--datadir",default="data",help="datadir")
     parser.add_argument("--image_dims",default=[20,20],help="image_dims")
-    parser.add_argument("--modeldef",default="../modeldef/deploy.prototxt",help="deploy file")
-    parser.add_argument("--weights_prefix",default="../trainedmodels/platerecognition_iter_",help="caffemodel prefix")
-    parser.add_argument("--labelfile",default="../modeldef/labels.txt",help="deploy file")
-    parser.add_argument("--meanfile",default="../modeldef/mean.binaryproto",help="meanfile")
-    parser.add_argument("--errordir",default="../error",help="errordir")
-    parser.add_argument("--logfile",default="../log.txt",help="log txt")
+    parser.add_argument("--modeldef",default="util/deploy.prototxt",help="deploy file")
+    parser.add_argument("--weights",default="models/plate999.caffemodel",help="caffemodel")
+    parser.add_argument("--labelfile",default="models/labels.txt",help="label file")
+    parser.add_argument("--meanfile",default="models/mean.binaryproto",help="meanfile")
+    parser.add_argument("--errordir",default="error",help="errordir")
+    parser.add_argument("--logfile",default="error.txt",help="log txt")
     parser.add_argument("--evaluationonebyone",default=True,help="log txt")
-    
+    parser.add_argument("--imgpath",default="data/0/0.jpg",help="image path")
     args = parser.parse_args()
-    clearlasterrors(args)
-    if args.evaluationonebyone:
-        evaluationonebyone(args)
-    else:
-        evaluation(args)
+    return args
 
-def evaluation1image():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--iter",default=3000,help="caffemodel iter to evaluation")
-    parser.add_argument("--image_dims",default=[20,20],help="image_dims")
-    parser.add_argument("--modeldef",default="../modeldef/deploy.prototxt",help="deploy file")
-    parser.add_argument("--weights_prefix",default="../trainedmodels/platerecognition_iter_",help="caffemodel prefix")
-    parser.add_argument("--labelfile",default="../modeldef/labels.txt",help="deploy file")
-    parser.add_argument("--meanfile",default="../modeldef/mean.binaryproto",help="meanfile")
-    parser.add_argument("--logfile",default="../log.txt",help="log txt")
-    parser.add_argument("--imgpath",default="../data/mask/299a24714_0.png",help="image path")
+def classification():
+    args = get_args()
     args = parser.parse_args()
     labels=[w.split()[1] for w in open(args.labelfile).readlines()]
     classifier=getclassifier(args)
@@ -163,9 +148,18 @@ def evaluation1image():
     predictions = classifier.predict(inputs,oversample=False)
     p=predictions[0,:].argmax()
     label=labels[p]
-    print label,predictions[0,p]
+    print(label,predictions[0,p])
     top_inds = predictions[0,:].argsort()[::-1][:5]
 
+def evaluation():
+    args = get_args()
+    clearlasterrors(args)
+    create_logger()
+    if args.evaluationonebyone:
+        evaluationonebyone(args)
+    else:
+        evaluation_batch(args)
+
 if __name__=='__main__':
-#        evaluation1image()
-    evaluationdir()
+    evaluation()
+    #classification()

@@ -4,7 +4,7 @@
 #include "LenetClassifier.h"
 using namespace std;
 const string errordir = caffeplatedir + "/error";
-const string platedatadir = caffeplatedir + "/data";
+const string platedatadir = caffeplatedir + "data";
 
 void cleardir(const string dir)
 {
@@ -63,9 +63,9 @@ int evaluation()
 					MKDIR(errorlabeldir.c_str());
 				}
 				string errorfilepath = errorlabeldir + "/" + file.substr(0,file.size()-4) + "_" + sub + "_" + int2string(ret) + ".png";
-				imshow("error", img);
+				//imshow("error", img);
 				imwrite(errorfilepath, img);
-				cv::waitKey(1);
+				//cv::waitKey(1);
 			}
 			total++;
 		}
@@ -75,7 +75,7 @@ int evaluation()
 	return 0;
 }
 
-int testimg(const std::string imgpath = "img/0.jpg")
+int testimg(const std::string imgpath = "data/0/0.jpg")
 {
     cv::Mat img = imread(imgpath);
     TickMeter tm;

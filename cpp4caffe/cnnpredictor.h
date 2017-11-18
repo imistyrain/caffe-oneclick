@@ -10,10 +10,10 @@
 #include <vector>
 using namespace std;
 const string caffeplatedir = "../";
-const string model_file = caffeplatedir + "modeldef/deploy.prototxt";
-const string trained_file = caffeplatedir + "/plate996.caffemodel";
-const string mean_file = caffeplatedir + "modeldef/mean.binaryproto";
-const string label_file = caffeplatedir + "modeldef/labels.txt";
+const string model_file = caffeplatedir + "models/deploy.prototxt";
+const string trained_file = caffeplatedir + "models/plate999.caffemodel";
+const string mean_file = caffeplatedir + "models/mean.binaryproto";
+const string label_file = caffeplatedir + "models/labels.txt";
 using namespace caffe;  // NOLINT(build/namespaces)
 using std::string;
 

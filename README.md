@@ -45,7 +45,7 @@ caffe一键式训练评估集成开发环境
 
 首先收集要任务相关的数据，这里准备了一个车牌字符数据（仅包含0-9共10个数字），直接解压[data.rar](data.rar)到当前文件夹即可，格式如下图所示，每类图片对应一个文件夹，放到一个data文件夹下，注意格式一致型（都为.jpg或.png文件），仔细筛查，不要含有其他的非图片文件在里面，你也可以用自己的数据替换这些车牌字符数据。
 
-![图片整理方式](doc/data.png)
+![structures](https://i.imgur.com/JQmNGYN.png)
 
 caffe使用了lmdb内存数据库等来加快训练时读取数据的速度，为此，caffe自带的tools里提供了一个工具（可由convert_imageset.cpp编译生成），它的输入是图片路径和标签对组成的文件，每次都手动生成这个文件不胜其烦。
 
@@ -88,7 +88,7 @@ evaluation.bat用来对data文件下下的数据进行评估，它会得出迭�
 以上4个步骤可以通过一个脚本一键式完成
 本项目提供了oneclick.bat来完成一键式生成数据、训练和评估模型，大大提升了开发效率。
 ```
-
+![](https://i.imgur.com/ySggZmf.png)
 ### 5.部署模型
 
 由于速度原因，实际中多使用C++而不是python进行部署，因此本项目在cpp文件夹下提供了evaluationcpp工程，它使用单例模式来防止每次预测都加载模型，只需使用如下代码即可在你的项目中一行代码使用CNN，此外，该项目也提供了对模型进行评估的功能。
@@ -104,7 +104,7 @@ evaluation.bat用来对data文件下下的数据进行评估，它会得出迭�
 "../build/examples/cpp_classification/classification" "modeldef/deploy.prototxt" "trainedmodels/platerecognition_iter_1000.caffemodel" "modeldef/mean.binaryproto" "modeldef/labels.txt" "data/0/4-3.jpg"
 ```
 <p align="center">
-    <img src="doc/classification.png", width="600">
+    <img src="https://i.imgur.com/TRv8d88.png", width="600">
 </p>
 
 其返回了最高的5个类别的相似度，不难看出训练的网络对于data/0/0.jpg有高达93%的概率认为其属于0这个字符，结果还是非常理想的
